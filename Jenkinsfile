@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "sujith1ns/devops-html"
-        CONTAINER_NAME = "devops-container"
+        FRONTEND = "sujith1ns/devops-html"
+        BACKEND = "sujith1ns/devops-backend"
     }
 
     stages {
@@ -14,9 +14,10 @@ pipeline {
             }
         }
 
-        stage('Build Image') {
+        stage('Build') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'docker build -t $FRONTEND .'
+                sh 'docker build -t $BACKEND -f Dockerfile.backend .'
             }
         }
 
@@ -32,18 +33,23 @@ pipeline {
             }
         }
 
-        stage('Push Image') {
+        stage('Push') {
             steps {
-                sh 'docker push $IMAGE_NAME'
+                sh 'docker push $FRONTEND'
+                sh 'docker push $BACKEND'
             }
         }
 
         stage('Deploy') {
             steps {
                 sh '''
-                docker stop $CONTAINER_NAME || true
-                docker rm $CONTAINER_NAME || true
-                docker run -d -p 8082:80 --name $CONTAINER_NAME $IMAGE_NAME
+                docker stop frontend || true
+                docker rm frontend || true
+                docker stop backend || true
+                docker rm backend || true
+
+                docker run -d -p 5000:5000 --name backend $BACKEND
+                docker run -d -p 8082:80 --name frontend $FRONTEND
                 '''
             }
         }
