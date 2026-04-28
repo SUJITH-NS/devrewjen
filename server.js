@@ -5,10 +5,10 @@ const { exec } = require("child_process");
 const app = express();
 app.use(cors());
 
-const JENKINS_URL = "http://localhost:8080";
+const JENKINS_URL = "http://host.docker.internal:8080";
 const JOB_NAME = "devops-project";
 
-// Jenkins Status
+// Build Status
 app.get("/jenkins/status", (req, res) => {
     exec(`curl -s ${JENKINS_URL}/job/${JOB_NAME}/lastBuild/api/json`, (err, stdout) => {
         if (err) return res.json({ error: "Jenkins error" });
@@ -24,7 +24,7 @@ app.get("/jenkins/pipeline", (req, res) => {
     });
 });
 
-// Docker
+// Docker Containers
 app.get("/docker", (req, res) => {
     exec("docker ps --format '{{json .}}'", (err, stdout) => {
         if (err) return res.json([]);
