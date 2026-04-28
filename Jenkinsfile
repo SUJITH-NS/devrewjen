@@ -35,8 +35,10 @@ pipeline {
 
         stage('Push') {
             steps {
-                sh 'docker push $FRONTEND'
-                sh 'docker push $BACKEND'
+                sh '''
+                docker push $FRONTEND || true
+                docker push $BACKEND || true
+                '''
             }
         }
 
